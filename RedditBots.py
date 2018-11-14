@@ -12,9 +12,9 @@ bots = {"Base64_Bot": Reddit(user_agent='', username='', password='', client_id=
         "SuS_Bot": Reddit(user_agent='', username='', password='', client_id='', client_secret='')
         }
 
-filePath = "/home/pi/reddit_bots/"
+filePath = ""
 
-mainTags = ["Discussion", "Question", "Reaction", "OC_Fanart", "Found_Fanart", "Music", "Video", "Cosplay", "OC_Edited_Media", "Found_Edited_Media", "Poetry", "Fanfic", "Custom_Dialogue", "News", "Meta", "Fun", "Misc", "Gameplay", "Game Mod"]
+mainTags = ["Discussion", "Question", "Reaction", "OC_Fanart", "Found_Fanart", "Music", "Video", "Cosplay", "OC_Edited_Media", "Found_Edited_Media", "Poetry", "Fanfic", "Custom_Dialogue", "News", "Meta", "Fun", "Misc", "Gameplay", "Game_Mod", "IRL_Media"]
 
 
 def readFile(fileName):
@@ -84,15 +84,31 @@ class Base64_Bot (Thread):
                         if "!base64" in comment.body.lower() and comment.parent().id not in list_[1]:
                             list_[1].append(comment.parent().id)
                             flag = True
-                            if "full" in comment.body.lower() or "both" in comment.body.lower():
-                                message = "#" + decodebytes(bytes(comment.submission.title, 'utf-8')).decode() + "\n\n" + decodebytes(bytes(rexSplit('\s', comment.submission.selftext, 1)[0], 'utf-8')).decode()
-                            elif "title" in comment.body.lower():
-                                message = decodebytes(bytes(comment.submission.title, 'utf-8')).decode()
-                            elif comment.is_root and comment.parent().is_self:
-                                message = decodebytes(bytes(rexSplit("\s", comment.parent().selftext, 1)[0], 'utf-8')).decode()
+                            if "force" in comment.body.lower():
+                                string = ""
+                                if "full" in comment.body.lower() or "both" in comment.body.lower() or "title" in comment.body.lower() or comment.is_root and comment.parent().is_self:
+                                    encodedList = rexSplit("\s", comment.submission.selftext)
+                                else:
+                                    encodedList = rexSplit("\s", comment.parent().body.replace("\n***\n^(If this bot is malfunctioning report it to u/JtBryant96)", ""))
+                                for encodedPiece in encodedList:
+                                    if encodedPiece is not "":
+                                        string += decodebytes(bytes(encodedPiece, 'utf-8')).decode() + "\n\n"
+                                if "full" in comment.body.lower() or "both" in comment.body.lower():
+                                    message = "#" + decodebytes(bytes(comment.submission.title, 'utf-8')).decode() + "\n\n" + string
+                                elif "title" in comment.body.lower():
+                                    message = decodebytes(bytes(comment.submission.title, 'utf-8')).decode()
+                                else:
+                                    message = string
                             else:
-                                message = decodebytes(bytes(rexSplit("\s", comment.parent().body, 1)[0], 'utf-8')).decode()
-                            # the decoder adds a second \ for some reason.
+                                if "full" in comment.body.lower() or "both" in comment.body.lower():
+                                    message = "#" + decodebytes(bytes(comment.submission.title, 'utf-8')).decode() + "\n\n" + decodebytes(bytes(rexSplit('\s', comment.submission.selftext, 1)[0], 'utf-8')).decode()
+                                elif "title" in comment.body.lower():
+                                    message = decodebytes(bytes(comment.submission.title, 'utf-8')).decode()
+                                elif comment.is_root and comment.parent().is_self:
+                                    message = decodebytes(bytes(rexSplit("\s", comment.parent().selftext, 1)[0], 'utf-8')).decode()
+                                else:
+                                    message = decodebytes(bytes(rexSplit("\s", comment.parent().body, 1)[0], 'utf-8')).decode()
+                                # the decoder adds a second \ for some reason.
                             message = message.replace("\\n", "\n").replace("\\'", "\'").replace("\\r", "\r")
                         elif "!binary" in comment.body.lower() and comment.parent().id not in list_[1]:
                             list_[1].append(comment.parent().id)
@@ -117,8 +133,8 @@ class Base64_Bot (Thread):
                             else:
                                 message = hexConvert(comment.parent().body)
                     except:
-                        flag = False
                         log("Error in Base64_Bot: " + comment.id)
+                        message += "Error: unable to decode."
                     if flag:
                         message += "\n***\n^(If this bot is malfunctioning report it to u/JtBryant96)"
                         if len(message) > 10000:
@@ -176,23 +192,23 @@ class DDLC_TagBot_Messages (Thread):
                                 confirmation += " excludeing NSFW content."
                             confirmation += "\n\nTo stop these messages, reply \"Stop\""
                             message.reply(confirmation)
-                        confirmation += "posts flaired as:"
-                        for i in range(len(mainTags)):
-                            if mainTags[i].lower().replace("_", " ") in body:
-                                tempTag[1].append(mainTags[i])
-                                body.replace(mainTags[i].lower().replace("_", " "), "")
-                                confirmation += " " + mainTags[i].replace("_", " ")
-                        if "special" in body:
-                            tempTag[1].append('Special')
-                            body.replace("special", "")
-                            confirmation += " *Moderator Edited Flairs*"
-                        if "NSFW" in tempTag[1]:
-                            confirmation += " including NSFW content."
                         else:
-                            confirmation += " excludeing NSFW content."
-                        confirmation += "\n\nTo stop these messages, reply \"Stop\""
-                        message.reply(confirmation)
-                        print(confirmation)
+                            confirmation += "posts flaired as:"
+                            for i in range(len(mainTags)):
+                                if mainTags[i].lower().replace("_", " ") in body:
+                                    tempTag[1].append(mainTags[i])
+                                    body.replace(mainTags[i].lower().replace("_", " "), "")
+                                    confirmation += " " + mainTags[i].replace("_", " ")
+                            if "special" in body:
+                                tempTag[1].append('Special')
+                                body.replace("special", "")
+                                confirmation += " *Moderator Edited Flairs*"
+                            if "NSFW" in tempTag[1]:
+                                confirmation += " including NSFW content."
+                            else:
+                                confirmation += " excludeing NSFW content."
+                            confirmation += "\n\nTo stop these messages, reply \"Stop\""
+                            message.reply(confirmation)
                         tagList.append(tempTag)
             with open(filePath + tagFile, "w") as f:
                 for x in tagList:
