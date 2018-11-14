@@ -8,9 +8,9 @@ from threading import Thread
 bots = {"DDLC_TagBot": Reddit(user_agent='', username='', password='', client_id='', client_secret='')
         }
 
-filePath = "/home/pi/reddit_bots/"
+filePath = ""
 
-mainTags = ["Discussion", "Question", "Reaction", "OC_Fanart", "Found_Fanart", "Music", "Video", "Cosplay", "OC_Edited_Media", "Found_Edited_Media", "Poetry", "Fanfic", "Custom_Dialogue", "News", "Meta", "Fun", "Misc", "Gameplay", "Game Mod"]
+mainTags = ["Discussion", "Question", "Reaction", "OC_Fanart", "Found_Fanart", "Music", "Video", "Cosplay", "OC_Edited_Media", "Found_Edited_Media", "Poetry", "Fanfic", "Custom_Dialogue", "News", "Meta", "Fun", "Misc", "Gameplay", "Game_Mod", "IRL_Media"]
 
 
 def readFile(fileName):
